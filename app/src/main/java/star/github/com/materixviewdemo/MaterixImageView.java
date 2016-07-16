@@ -24,7 +24,7 @@ public class MaterixImageView extends ImageView {
     private Matrix mCurrentMatrix;//当前的矩阵状态
     private PointF mStartPoint;
     private PointF mCenterPoint;
-    private double mDownRotate;
+    private double mSaveRotate;
     private double mCurrentRotate;
     private int mCurrentMode = MODE_NONE;//当前模式
     private float mSaveInterval;//保存scale之前的两指间的间隔
@@ -78,7 +78,7 @@ public class MaterixImageView extends ImageView {
                         float scale = mCurrentInterval / mSaveInterval;
                         mCurrentMatrix.postScale(scale, scale, mCenterPoint.x, mCenterPoint.y);
                     }
-                    float degrees = (float) (mCurrentRotate - mDownRotate);
+                    float degrees = (float) (mCurrentRotate - mSaveRotate);
                     mCurrentMatrix.postRotate(degrees, getMeasuredWidth() / 2, getMeasuredHeight() / 2);
                 }
                 break;
@@ -96,7 +96,7 @@ public class MaterixImageView extends ImageView {
                     getCenterPoint(mCenterPoint, event);
                     mCurrentMode = MODE_ZOOM;
                 }
-                mDownRotate = caculateRotate(event);
+                mSaveRotate = caculateRotate(event);
                 break;
         }
         setImageMatrix(mCurrentMatrix);
