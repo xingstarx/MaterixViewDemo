@@ -90,14 +90,16 @@ public class MaterixImageView extends ImageView {
                     mCurrentMatrix.postTranslate(dx, dy);
                 } else if (mCurrentMode == MODE_ZOOM && event.getPointerCount() == 2) {
                     mCurrentMatrix.set(mSaveMatrix);
-                    mCurrentRotate = caculateRotate(event);
                     mCurrentInterval = caculateInterval(event);
                     if (mCurrentInterval > 10f) {
                         float scale = mCurrentInterval / mSaveInterval;
                         mCurrentMatrix.postScale(scale, scale, mCenterPoint.x, mCenterPoint.y);
                     }
-                    float degrees = (float) (mCurrentRotate - mSaveRotate);
-                    mCurrentMatrix.postRotate(degrees, getMeasuredWidth() / 2, getMeasuredHeight() / 2);
+                    if (mSupportRotate) {
+                        mCurrentRotate = caculateRotate(event);
+                        float degrees = (float) (mCurrentRotate - mSaveRotate);
+                        mCurrentMatrix.postRotate(degrees, getMeasuredWidth() / 2, getMeasuredHeight() / 2);
+                    }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
@@ -114,7 +116,9 @@ public class MaterixImageView extends ImageView {
                     getCenterPoint(mCenterPoint, event);
                     mCurrentMode = MODE_ZOOM;
                 }
-                mSaveRotate = caculateRotate(event);
+                if (mSupportRotate) {
+                    mSaveRotate = caculateRotate(event);
+                }
                 break;
         }
         setImageMatrix(mCurrentMatrix);
