@@ -1,14 +1,19 @@
 package star.github.com.materixviewdemo;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.IntDef;
 import android.support.v4.view.MotionEventCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Created by xiongxingxing on 16/7/16.
@@ -29,6 +34,10 @@ public class MaterixImageView extends ImageView {
     private int mCurrentMode = MODE_NONE;//当前模式
     private float mSaveInterval;//保存scale之前的两指间的间隔
     private float mCurrentInterval;//当前的间隔
+    private boolean mSupportRotate;
+    private boolean supportScale;
+    private int mMaterixScaleType;
+
 
     public MaterixImageView(Context context) {
         this(context, null);
@@ -41,6 +50,15 @@ public class MaterixImageView extends ImageView {
     public MaterixImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
+        initAttrs(context, attrs, defStyleAttr);
+    }
+
+    private void initAttrs(Context context, AttributeSet attrs, int defStyleAttr) {
+        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MaterixImageView,
+                defStyleAttr, 0);
+        mSupportRotate = a.getBoolean(R.styleable.MaterixImageView_supportRotate, false);
+        supportScale = a.getBoolean(R.styleable.MaterixImageView_supportScale, true);
+        mMaterixScaleType = a.getInt(R.styleable.MaterixImageView_supportScaleType, 1);
     }
 
     private void init() {
@@ -112,11 +130,11 @@ public class MaterixImageView extends ImageView {
     }
 
     private void getCenterPoint(PointF centerPoint, MotionEvent event) {
-        centerPoint.set((event.getX(0) + event.getX(1)) / 2 , (event.getY(0) + event.getY(1)) / 2);
+        centerPoint.set((event.getX(0) + event.getX(1)) / 2, (event.getY(0) + event.getY(1)) / 2);
     }
 
     private double caculateRotate(MotionEvent event) {
-         double angrd = Math.atan2(event.getY(0) - event.getY(1), event.getX(0) - event.getX(1));
+        double angrd = Math.atan2(event.getY(0) - event.getY(1), event.getX(0) - event.getX(1));
         return Math.toDegrees(angrd);
     }
 
@@ -143,4 +161,13 @@ public class MaterixImageView extends ImageView {
     public boolean hasDrawable() {
         return getDrawable() != null && getDrawable() instanceof BitmapDrawable;
     }
+
+
+    public static final int SCALE_TYPE_NONE = 0;
+    public static final int SCALE_TYPE_MIN = 1;
+    public static final int SCALE_TYPE_MAX = 2;
+    @IntDef({SCALE_TYPE_NONE, SCALE_TYPE_MIN, SCALE_TYPE_MAX})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MaterixScaleType {}
+
 }
