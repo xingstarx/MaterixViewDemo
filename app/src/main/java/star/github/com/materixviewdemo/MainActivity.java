@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     private ScaleGestureDetector mScaleGestureDetector;
     private float mMinScale = 0.5f;
+    private float mMaxScale = 3f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +58,13 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
         float scaleFactor = detector.getScaleFactor();
-        Log.e(TAG, "onScale == sacleFactor == " + scaleFactor);
         if (Float.isNaN(scaleFactor) || Float.isInfinite(scaleFactor)) {
             return false;
         }
-        if (getScale() > mMinScale || scaleFactor > 1f) {
+        // set min scale scope, max scale scope
+        Log.e(TAG, "onScale == sacleFactor == " + scaleFactor + "getScale() == " + getScale());
+
+        if ((getScale() > mMinScale || scaleFactor > 1f) && (getScale() < mMaxScale || scaleFactor < 1f)) {
             mBaseMatrix.postScale(scaleFactor, scaleFactor, getImageWidth() / 2, getImageHeight() / 2);
             mMaterixImageView.setImageMatrix(mBaseMatrix);
         }
