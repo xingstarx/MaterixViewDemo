@@ -93,6 +93,7 @@ public class MaterixImageView extends ImageView {
                     mCurrentInterval = caculateInterval(event);
                     if (mCurrentInterval > 10f) {
                         float scale = mCurrentInterval / mSaveInterval;
+                        Log.e(TAG, "scale == " + scale);
                         mCurrentMatrix.postScale(scale, scale, mCenterPoint.x, mCenterPoint.y);
                     }
                     if (mSupportRotate) {
@@ -156,6 +157,7 @@ public class MaterixImageView extends ImageView {
     }
 
     public void update() {
+        Log.e(TAG, "update");
         if (hasDrawable()) {
             float drawableWidth = getDrawableWidth();
             float drawableHeight = getDrawableHeight();
