@@ -148,8 +148,20 @@ public class MaterixImageView extends ImageView {
         if (hasDrawable()) {
             float drawableWidth = getDrawableWidth();
             float drawableHeight = getDrawableHeight();
+            mCurrentMatrix.reset();
             mCurrentMatrix.setTranslate((w - drawableWidth) / 2F,
                     (h - drawableHeight) / 2F);
+            setImageMatrix(mCurrentMatrix);
+        }
+    }
+
+    public void update() {
+        if (hasDrawable()) {
+            float drawableWidth = getDrawableWidth();
+            float drawableHeight = getDrawableHeight();
+            mCurrentMatrix.reset();
+            mCurrentMatrix.setTranslate((getMeasuredWidth() - drawableWidth) / 2F,
+                    (getMeasuredHeight() - drawableHeight) / 2F);
             setImageMatrix(mCurrentMatrix);
         }
     }
