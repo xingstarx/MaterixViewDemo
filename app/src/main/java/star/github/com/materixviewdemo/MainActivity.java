@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private final float[] mMatrixValues = new float[9];
 
     private ScaleGestureDetector mScaleGestureDetector;
-    private float mMinScale = 0.45f;
+    private float mMinScale = 0.5f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
