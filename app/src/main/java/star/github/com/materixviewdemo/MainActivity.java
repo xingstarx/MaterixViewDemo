@@ -18,8 +18,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private static final String TAG = "MainActivity";
     private ImageView mMaterixImageView;
     private Matrix mBaseMatrix = new Matrix();
+    private final float[] mMatrixValues = new float[9];
 
     private ScaleGestureDetector mScaleGestureDetector;
+    private float mMinScale = 0.45f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +61,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         if (Float.isNaN(scaleFactor) || Float.isInfinite(scaleFactor)) {
             return false;
         }
-        mBaseMatrix.postScale(scaleFactor, scaleFactor, detector.getFocusX(), detector.getFocusY());
-        mMaterixImageView.setImageMatrix(mBaseMatrix);
+        if (getScale() > mMinScale || scaleFactor > 1f) {
+            mBaseMatrix.postScale(scaleFactor, scaleFactor, getImageWidth() / 2, getImageHeight() / 2);
+            mMaterixImageView.setImageMatrix(mBaseMatrix);
+        }
         return true;
     }
 
@@ -77,6 +81,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             return true;
         }
         return false;
+    }
+
+    public float getScale() {
+        return (float) Math.hypot(getValue(mBaseMatrix, Matrix.MSCALE_X), getValue(mBaseMatrix, Matrix.MSCALE_Y));
+    }
+
+    private float getValue(Matrix matrix, int whichValue) {
+        matrix.getValues(mMatrixValues);
+        return mMatrixValues[whichValue];
     }
 
     private float getImageWidth() {
