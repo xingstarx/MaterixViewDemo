@@ -3,8 +3,10 @@ package star.github.com.materixviewdemo;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -13,16 +15,57 @@ import android.widget.ImageView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-public class MainActivity extends AppCompatActivity implements View.OnTouchListener, ScaleGestureDetector.OnScaleGestureListener {
+public class MainActivity extends AppCompatActivity implements View.OnTouchListener {
 
     private static final String TAG = "MainActivity";
+    private final float[] mMatrixValues = new float[9];
     private ImageView mMaterixImageView;
     private Matrix mBaseMatrix = new Matrix();
-    private final float[] mMatrixValues = new float[9];
-
+    private Matrix mSaveMatrix = new Matrix();
     private ScaleGestureDetector mScaleGestureDetector;
+    private GestureDetector mGestureDetector;
+    @NonNull
+    private GestureDetector.SimpleOnGestureListener mSimpleOnGestureListener = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            float scale = getScale();
+            Log.e(TAG, "onDoubleTap == " + scale);
+            mBaseMatrix.set(mSaveMatrix);
+            if (scale < mMidScale) {
+                scale = mMidScale;
+            } else if (scale < mMaxScale) {
+                scale = mMaxScale;
+            } else if (scale >= mMaxScale) {
+                scale = mDefaultScale;
+            }
+            Log.e(TAG, "onDoubleTap 2== " + scale);
+            mBaseMatrix.postScale(scale, scale, getImageWidth() / 2, getImageHeight() / 2);
+            mMaterixImageView.setImageMatrix(mBaseMatrix);
+            return true;
+        }
+    };
     private float mMinScale = 0.5f;
+    private float mDefaultScale = 1f;
+    private float mMidScale = 1.75f;
     private float mMaxScale = 3f;
+    @NonNull
+    private ScaleGestureDetector.SimpleOnScaleGestureListener mSimpleOnScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            float scaleFactor = detector.getScaleFactor();
+            if (Float.isNaN(scaleFactor) || Float.isInfinite(scaleFactor)) {
+                return false;
+            }
+            // set min scale scope, max scale scope
+            Log.e(TAG, "onScale == sacleFactor == " + scaleFactor + "getScale() == " + getScale());
+
+            if ((getScale() > mMinScale || scaleFactor > 1f) && (getScale() < mMaxScale || scaleFactor < 1f)) {
+                mBaseMatrix.postScale(scaleFactor, scaleFactor, getImageWidth() / 2, getImageHeight() / 2);
+                mMaterixImageView.setImageMatrix(mBaseMatrix);
+            }
+            return true;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +75,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         mMaterixImageView.setScaleType(ImageView.ScaleType.MATRIX);
         mMaterixImageView.setOnTouchListener(this);
 
-        mScaleGestureDetector = new ScaleGestureDetector(this, this);
+        mScaleGestureDetector = new ScaleGestureDetector(this, mSimpleOnScaleGestureListener);
+        mGestureDetector = new GestureDetector(this, mSimpleOnGestureListener);
         Picasso.with(this)
                 .load("http://pbs.twimg.com/media/Bist9mvIYAAeAyQ.jpg")
                 .fit().centerInside()
@@ -50,25 +94,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        boolean flag = mScaleGestureDetector.onTouchEvent(event);
+        boolean flag = mGestureDetector.onTouchEvent(event);
+        flag |= mScaleGestureDetector.onTouchEvent(event);
         Log.e(TAG, "flag == " + flag);
         return flag;
-    }
-
-    @Override
-    public boolean onScale(ScaleGestureDetector detector) {
-        float scaleFactor = detector.getScaleFactor();
-        if (Float.isNaN(scaleFactor) || Float.isInfinite(scaleFactor)) {
-            return false;
-        }
-        // set min scale scope, max scale scope
-        Log.e(TAG, "onScale == sacleFactor == " + scaleFactor + "getScale() == " + getScale());
-
-        if ((getScale() > mMinScale || scaleFactor > 1f) && (getScale() < mMaxScale || scaleFactor < 1f)) {
-            mBaseMatrix.postScale(scaleFactor, scaleFactor, getImageWidth() / 2, getImageHeight() / 2);
-            mMaterixImageView.setImageMatrix(mBaseMatrix);
-        }
-        return true;
     }
 
     public void update() {
@@ -76,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
             return;
         }
         mBaseMatrix.postTranslate((getImageWidth() - getDrawableWidth()) / 2, (getImageHeight() - getDrawableHeight()) / 2);
+        mSaveMatrix.set(mBaseMatrix);
         mMaterixImageView.setImageMatrix(mBaseMatrix);
     }
 
@@ -109,14 +139,5 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     private float getDrawableHeight() {
         return mMaterixImageView.getDrawable().getIntrinsicHeight();
-    }
-
-    @Override
-    public boolean onScaleBegin(ScaleGestureDetector detector) {
-        return true;
-    }
-
-    @Override
-    public void onScaleEnd(ScaleGestureDetector detector) {
     }
 }
