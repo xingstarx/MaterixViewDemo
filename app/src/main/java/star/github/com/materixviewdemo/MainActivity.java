@@ -20,8 +20,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private static final String TAG = "MainActivity";
     private final float[] mMatrixValues = new float[9];
     private ImageView mMaterixImageView;
-    private Matrix mBaseMatrix = new Matrix();
-    private Matrix mSaveMatrix = new Matrix();
+    private Matrix mBaseMatrix = new Matrix();//代表当前ImageView的矩阵
+    private Matrix mSaveMatrix = new Matrix();//备份当前的ImageView,便于恢复
     private ScaleGestureDetector mScaleGestureDetector;
     private GestureDetector mGestureDetector;
     @NonNull
@@ -29,17 +29,15 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         @Override
         public boolean onDoubleTap(MotionEvent e) {
             float scale = getScale();
-            Log.e(TAG, "onDoubleTap == " + scale);
-            mBaseMatrix.set(mSaveMatrix);
+            float scaleFactor = 0;
             if (scale < mMidScale) {
-                scale = mMidScale;
+                scaleFactor = mMidScale / scale;
             } else if (scale < mMaxScale) {
-                scale = mMaxScale;
+                scaleFactor = mMaxScale / scale;
             } else if (scale >= mMaxScale) {
-                scale = mDefaultScale;
+                scaleFactor = mDefaultScale / scale;
             }
-            Log.e(TAG, "onDoubleTap 2== " + scale);
-            mBaseMatrix.postScale(scale, scale, getImageWidth() / 2, getImageHeight() / 2);
+            mBaseMatrix.postScale(scaleFactor, scaleFactor, getImageWidth() / 2, getImageHeight() / 2);
             mMaterixImageView.setImageMatrix(mBaseMatrix);
             return true;
         }
@@ -96,7 +94,6 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     public boolean onTouch(View v, MotionEvent event) {
         boolean flag = mGestureDetector.onTouchEvent(event);
         flag |= mScaleGestureDetector.onTouchEvent(event);
-        Log.e(TAG, "flag == " + flag);
         return flag;
     }
 
@@ -118,6 +115,10 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
 
     public float getScale() {
         return (float) Math.hypot(getValue(mBaseMatrix, Matrix.MSCALE_X), getValue(mBaseMatrix, Matrix.MSCALE_Y));
+    }
+
+    public float getScale(Matrix matrix) {
+        return (float) Math.hypot(getValue(matrix, Matrix.MSCALE_X), getValue(matrix, Matrix.MSCALE_Y));
     }
 
     private float getValue(Matrix matrix, int whichValue) {
